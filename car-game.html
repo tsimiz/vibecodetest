@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top-Down Car Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #2c3e50;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #ecf0f1;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        canvas {
+            border: 3px solid #34495e;
+            background-color: #27ae60;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .info {
+            color: #ecf0f1;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top-Down Car Game</h1>
+    <div class="controls">
+        Use Arrow Keys or WASD to drive the car. Avoid hitting buildings!
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="info">
+        Red car • Gray buildings • Green grass • Black roads
+    </div>
+
+    <script>
+        // Game setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        const gameState = {
+            keys: {},
+            running: true
+        };
+        
+        // Car object
+        const car = {
+            x: 100,
+            y: 100,
+            width: 20,
+            height: 30,
+            speed: 3,
+            color: '#e74c3c'
+        };
+        
+        // City map - buildings as rectangles
+        const buildings = [
+            // Top row buildings
+            { x: 150, y: 50, width: 100, height: 80 },
+            { x: 300, y: 50, width: 120, height: 80 },
+            { x: 500, y: 50, width: 100, height: 80 },
+            { x: 650, y: 50, width: 100, height: 80 },
+            
+            // Second row buildings
+            { x: 50, y: 200, width: 80, height: 100 },
+            { x: 200, y: 180, width: 90, height: 120 },
+            { x: 350, y: 200, width: 100, height: 80 },
+            { x: 500, y: 180, width: 80, height: 100 },
+            { x: 650, y: 200, width: 100, height: 90 },
+            
+            // Third row buildings
+            { x: 100, y: 350, width: 120, height: 100 },
+            { x: 280, y: 370, width: 100, height: 80 },
+            { x: 450, y: 350, width: 90, height: 100 },
+            { x: 600, y: 360, width: 110, height: 90 },
+            
+            // Bottom row buildings
+            { x: 50, y: 500, width: 100, height: 80 },
+            { x: 200, y: 520, width: 80, height: 60 },
+            { x: 350, y: 500, width: 120, height: 80 },
+            { x: 520, y: 510, width: 100, height: 70 },
+            { x: 680, y: 500, width: 90, height: 80 }
+        ];
+        
+        // Roads (represented as clear paths between buildings)
+        const roads = [
+            // Horizontal roads
+            { x: 0, y: 140, width: 800, height: 30 },
+            { x: 0, y: 310, width: 800, height: 30 },
+            { x: 0, y: 470, width: 800, height: 30 },
+            
+            // Vertical roads
+            { x: 20, y: 0, width: 30, height: 600 },
+            { x: 260, y: 0, width: 30, height: 600 },
+            { x: 420, y: 0, width: 30, height: 600 },
+            { x: 580, y: 0, width: 30, height: 600 },
+            { x: 750, y: 0, width: 30, height: 600 }
+        ];
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            gameState.keys[e.code] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key.toLowerCase()] = false;
+            gameState.keys[e.code] = false;
+        });
+        
+        // Collision detection
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+        
+        function checkBuildingCollisions(newX, newY) {
+            const testCar = {
+                x: newX,
+                y: newY,
+                width: car.width,
+                height: car.height
+            };
+            
+            // Check collision with buildings
+            for (let building of buildings) {
+                if (checkCollision(testCar, building)) {
+                    return true;
+                }
+            }
+            
+            // Check bounds
+            if (newX < 0 || newX + car.width > canvas.width ||
+                newY < 0 || newY + car.height > canvas.height) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Update game state
+        function update() {
+            if (!gameState.running) return;
+            
+            let newX = car.x;
+            let newY = car.y;
+            
+            // Handle input
+            if (gameState.keys['arrowup'] || gameState.keys['w']) {
+                newY -= car.speed;
+            }
+            if (gameState.keys['arrowdown'] || gameState.keys['s']) {
+                newY += car.speed;
+            }
+            if (gameState.keys['arrowleft'] || gameState.keys['a']) {
+                newX -= car.speed;
+            }
+            if (gameState.keys['arrowright'] || gameState.keys['d']) {
+                newX += car.speed;
+            }
+            
+            // Check for collisions before moving
+            if (!checkBuildingCollisions(newX, car.y)) {
+                car.x = newX;
+            }
+            if (!checkBuildingCollisions(car.x, newY)) {
+                car.y = newY;
+            }
+        }
+        
+        // Render game
+        function render() {
+            // Clear canvas with grass background
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw roads
+            ctx.fillStyle = '#34495e';
+            for (let road of roads) {
+                ctx.fillRect(road.x, road.y, road.width, road.height);
+            }
+            
+            // Draw road markings (dashed lines)
+            ctx.fillStyle = '#f1c40f';
+            // Horizontal road markings
+            for (let road of roads) {
+                if (road.width > road.height) { // Horizontal road
+                    const y = road.y + road.height / 2;
+                    for (let x = 0; x < canvas.width; x += 40) {
+                        ctx.fillRect(x, y - 1, 20, 2);
+                    }
+                } else { // Vertical road
+                    const x = road.x + road.width / 2;
+                    for (let y = 0; y < canvas.height; y += 40) {
+                        ctx.fillRect(x - 1, y, 2, 20);
+                    }
+                }
+            }
+            
+            // Draw buildings
+            ctx.fillStyle = '#95a5a6';
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 2;
+            for (let building of buildings) {
+                ctx.fillRect(building.x, building.y, building.width, building.height);
+                ctx.strokeRect(building.x, building.y, building.width, building.height);
+            }
+            
+            // Add some building details
+            ctx.fillStyle = '#3498db';
+            for (let building of buildings) {
+                // Windows
+                const windowSize = 8;
+                const windowSpacing = 15;
+                for (let x = building.x + 10; x < building.x + building.width - windowSize; x += windowSpacing) {
+                    for (let y = building.y + 10; y < building.y + building.height - windowSize; y += windowSpacing) {
+                        ctx.fillRect(x, y, windowSize, windowSize);
+                    }
+                }
+            }
+            
+            // Draw car
+            ctx.fillStyle = car.color;
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+            
+            // Car details
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(car.x + 2, car.y + 2, car.width - 4, car.height - 4);
+            
+            // Car direction indicator (front)
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(car.x + car.width/2 - 2, car.y, 4, 6);
+        }
+        
+        // Game loop
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start the game
+        gameLoop();
+    </script>
+</body>
+</html>
