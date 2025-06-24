@@ -154,6 +154,13 @@
       ctx.fillStyle = gradient;
       ctx.fillRect(x, y, w, h);
       
+      // Car highlight for 3D effect
+      const highlight = ctx.createLinearGradient(x, y, x, y + h/3);
+      highlight.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+      highlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = highlight;
+      ctx.fillRect(x + 2, y + 2, w - 4, h/3);
+      
       // Car outline
       ctx.strokeStyle = '#055';
       ctx.lineWidth = 1;
@@ -218,6 +225,13 @@
         gradient.addColorStop(1, '#a11');
         ctx.fillStyle = gradient;
         ctx.fillRect(x, y, w, h);
+        
+        // Car highlight for 3D effect
+        const highlight = ctx.createLinearGradient(x, y, x, y + h/3);
+        highlight.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+        highlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = highlight;
+        ctx.fillRect(x + 1, y + 1, w - 2, h/3);
         
         // Car outline
         ctx.strokeStyle = '#500';
