@@ -137,16 +137,129 @@
     }
 
     function drawCar() {
-      ctx.fillStyle = '#0af';
-      ctx.fillRect(car.x - car.width / 2, car.y, car.width, car.height);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(car.x - 10, car.y + 10, 20, 10);
+      const x = car.x - car.width / 2;
+      const y = car.y;
+      const w = car.width;
+      const h = car.height;
+      
+      // Car shadow (3D effect)
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillRect(x + 2, y + 2, w, h);
+      
+      // Main car body with gradient
+      const gradient = ctx.createLinearGradient(x, y, x + w, y);
+      gradient.addColorStop(0, '#0cf');
+      gradient.addColorStop(0.5, '#0af');
+      gradient.addColorStop(1, '#089');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, y, w, h);
+      
+      // Car outline
+      ctx.strokeStyle = '#055';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, w, h);
+      
+      // Windshield with gradient
+      const windshieldGradient = ctx.createLinearGradient(x + 5, y + 5, x + 5, y + 20);
+      windshieldGradient.addColorStop(0, '#eef');
+      windshieldGradient.addColorStop(1, '#aaf');
+      ctx.fillStyle = windshieldGradient;
+      ctx.fillRect(x + 5, y + 5, w - 10, 15);
+      
+      // Windshield outline
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 5, y + 5, w - 10, 15);
+      
+      // Front headlights
+      ctx.fillStyle = '#ffe';
+      ctx.fillRect(x + 3, y - 2, 6, 4);
+      ctx.fillRect(x + w - 9, y - 2, 6, 4);
+      ctx.strokeStyle = '#ccc';
+      ctx.strokeRect(x + 3, y - 2, 6, 4);
+      ctx.strokeRect(x + w - 9, y - 2, 6, 4);
+      
+      // Wheels
+      ctx.fillStyle = '#222';
+      // Left wheel
+      ctx.fillRect(x - 2, y + 15, 6, 12);
+      ctx.fillRect(x - 2, y + h - 27, 6, 12);
+      // Right wheel  
+      ctx.fillRect(x + w - 4, y + 15, 6, 12);
+      ctx.fillRect(x + w - 4, y + h - 27, 6, 12);
+      
+      // Wheel rims
+      ctx.fillStyle = '#666';
+      ctx.fillRect(x - 1, y + 17, 4, 8);
+      ctx.fillRect(x - 1, y + h - 25, 4, 8);
+      ctx.fillRect(x + w - 3, y + 17, 4, 8);
+      ctx.fillRect(x + w - 3, y + h - 25, 4, 8);
+      
+      // Rear bumper
+      ctx.fillStyle = '#066';
+      ctx.fillRect(x + 3, y + h - 3, w - 6, 3);
     }
 
     function drawObstacles() {
-      ctx.fillStyle = '#f22';
       obstacles.forEach(o => {
-        ctx.fillRect(o.x - o.width / 2, o.y, o.width, o.height);
+        const x = o.x - o.width / 2;
+        const y = o.y;
+        const w = o.width;
+        const h = o.height;
+        
+        // Car shadow (3D effect)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x + 1, y + 1, w, h);
+        
+        // Main car body with gradient
+        const gradient = ctx.createLinearGradient(x, y, x + w, y);
+        gradient.addColorStop(0, '#f44');
+        gradient.addColorStop(0.5, '#f22');
+        gradient.addColorStop(1, '#a11');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, y, w, h);
+        
+        // Car outline
+        ctx.strokeStyle = '#500';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, w, h);
+        
+        // Windshield
+        const windshieldGradient = ctx.createLinearGradient(x + 3, y + h - 18, x + 3, y + h - 8);
+        windshieldGradient.addColorStop(0, '#eef');
+        windshieldGradient.addColorStop(1, '#aaf');
+        ctx.fillStyle = windshieldGradient;
+        ctx.fillRect(x + 3, y + h - 18, w - 6, 10);
+        
+        // Windshield outline
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 3, y + h - 18, w - 6, 10);
+        
+        // Rear lights
+        ctx.fillStyle = '#f88';
+        ctx.fillRect(x + 2, y + h - 2, 4, 2);
+        ctx.fillRect(x + w - 6, y + h - 2, 4, 2);
+        
+        // Wheels
+        ctx.fillStyle = '#222';
+        // Left wheel
+        ctx.fillRect(x - 1, y + 8, 4, 8);
+        ctx.fillRect(x - 1, y + h - 16, 4, 8);
+        // Right wheel  
+        ctx.fillRect(x + w - 3, y + 8, 4, 8);
+        ctx.fillRect(x + w - 3, y + h - 16, 4, 8);
+        
+        // Wheel rims
+        ctx.fillStyle = '#555';
+        ctx.fillRect(x, y + 10, 2, 4);
+        ctx.fillRect(x, y + h - 14, 2, 4);
+        ctx.fillRect(x + w - 2, y + 10, 2, 4);
+        ctx.fillRect(x + w - 2, y + h - 14, 2, 4);
+        
+        // Front bumper
+        ctx.fillStyle = '#600';
+        ctx.fillRect(x + 2, y, w - 4, 2);
       });
     }
 
